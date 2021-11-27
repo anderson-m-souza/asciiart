@@ -5,6 +5,7 @@ import colorsys
 import subprocess
 
 import colorama
+import fpdf
 from PIL import Image
 
 
@@ -92,6 +93,13 @@ def parse_arguments():
         help='the image path'
     )
 
+    parser.add_argument(
+        '-o',
+        '--output',
+        metavar='NAME',
+        help='generate a pdf file with the ascii art'
+    )
+
     return parser.parse_args()
 
 
@@ -116,6 +124,9 @@ def main():
                 chars = get_char_color(rgb) + chars + get_main_color()
             asciiart += chars
         asciiart += '\n'
+
+    if args.output:
+        generate_pdf(asciiart)
 
     print(asciiart, end='')
     colorama.deinit()
@@ -226,7 +237,7 @@ def get_main_color():
     color = args.color
 
     if not color:
-        return colorama.Fore.RESET
+        return ''
 
     elif color == 'black':
         return colorama.Fore.BLACK
@@ -318,6 +329,15 @@ def get_char_color(rgb):
 
             else:
                 return colorama.Fore.RESET
+
+
+def generate_pdf(asciiart):
+    pdf = fpdf.FPDF()
+    pdf.compress = False
+    pdf.add_page()
+    pdf.set_font('Courier', size=3)
+    pdf.write(1.5, txt=asciiart)
+    pdf.output(args.output)
 
 
 args = parse_arguments()
